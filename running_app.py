@@ -18,7 +18,7 @@ def calculate_angle(a, b, c):
 
 class PoseTransformer:
     def __init__(self):
-        self.pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
+        self.pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=0)
         
         # Inicijalizacija brojača i stanja za desnu nogu
         self.right_counter = 0
@@ -144,7 +144,7 @@ else:
         video_processor_factory=PoseTransformer, 
         rtc_configuration=rtc_config, 
         media_stream_constraints={
-            "video": {"width": 640, "height": 480}, 
+            "video": {"width": 480, "height": 360, "frameRate": 15},
             "audio": False
         },
         async_processing=True
