@@ -31,47 +31,36 @@ class PoseTransformer:
         return av.VideoFrame.from_ndarray(img, format="bgr24")
 
 st.title("Running Tracker")
-st.write("Upload a video or start your webcam to track in real-time.")
 
-col1, col2 = st.columns(2)
-with col1:
-    uploaded_video = st.file_uploader("Upload Video", type=["mp4", "avi", "mov"])
+uploaded_video = st.file_uploader("Upload Video", type=["mp4", "avi", "mov"])
 
 rtc_config = RTCConfiguration({"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]})
 
 if uploaded_video:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp_file:
+    with tempfile.NamedTemporaryFile(delete=True, suffix=".mp4") as tmp_file:
         tmp_file.write(uploaded_video.read())
         tmp_path = tmp_file.name
     
-    cap = cv2.VideoCapture(tmp_path)
-    transformer = PoseTransformer()
-    output_frames = []
-    
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+        cap = cv2.VideoCapture(tmp_path)
+        transformer = PoseTransformer()
         
-        class DummyFrame:
-            def __init__(self, img): self.img = img
-            def to_ndarray(self, format): return self.img
+        frame_placeholder = st.empty()
+        
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                break
             
-        processed_frame_av = transformer.recv(DummyFrame(frame))
-        processed_frame = processed_frame_av.to_ndarray(format="bgr24")
-        output_frames.append(processed_frame)
-    
-    cap.release()
-    
-    if output_frames:
-        out_path = "output_video.mp4"
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        height, width, _ = output_frames[0].shape
-        out = cv2.VideoWriter(out_path, fourcc, 30.0, (width, height))
-        for f in output_frames:
-            out.write(f)
-        out.release()
-        st.video(out_path)
+            class DummyFrame:
+                def __init__(self, img): self.img = img
+                def to_ndarray(self, format): return self.img
+                
+            processed_frame_av = transformer.recv(DummyFrame(frame))
+            processed_frame = processed_frame_av.to_ndarray(format="bgr24")
+            
+            frame_placeholder.image(processed_frame, channels="BGR")
+        
+        cap.release()
 else:
     webrtc_streamer(
         key="pose-tracking", 
