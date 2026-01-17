@@ -18,7 +18,7 @@ def calculate_angle(a, b, c):
 
 class PoseTransformer:
     def __init__(self):
-        self.pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5, model_complexity=0)
+        self.pose = mp_pose.Pose(min_detection_confidence=0.5, min_tracking_confidence=0.5)
         
         # Inicijalizacija brojača i stanja za desnu nogu
         self.right_counter = 0
